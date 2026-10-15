@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cultural Event Guide – AI Chatbot</title>
+<style>
+  :root{
+    --saffron:#ff7a18;
+    --magenta:#d6336c;
+    --purple:#6f42c1;
+    --deep:#2b1b4a;
+    --bg:#fff8f1;
+    --card:#ffffff;
+    --text:#2a2238;
+    --muted:#7a7287;
+    --border:#f0e3d6;
+    --grad:linear-gradient(135deg,#ff7a18 0%,#d6336c 55%,#6f42c1 100%);
+    --shadow:0 10px 30px rgba(111,66,193,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(1000px 500px at 85% -10%,rgba(255,122,24,.18),transparent 60%),
+      radial-gradient(900px 500px at -10% 110%,rgba(111,66,193,.16),transparent 60%),
+      var(--bg);
+    display:flex;justify-content:center;
+  }
+  .app{
+    width:100%;max-width:980px;height:100vh;height:100dvh;
+    display:flex;flex-direction:column;
+    background:rgba(255,255,255,.55);
+    backdrop-filter:blur(6px);
+    border-left:1px solid var(--border);border-right:1px solid var(--border);
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    background:var(--grad);color:#fff;
+    padding:14px 20px;display:flex;align-items:center;gap:14px;
+    box-shadow:0 4px 18px rgba(214,51,108,.35);
+    position:relative;z-index:2;
+  }
+  .logo{
+    width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.2);
+    display:grid;place-items:center;font-size:26px;
+    animation:float 3.5s ease-in-out infinite;
+  }
+  .brand h1{font-size:1.2rem;letter-spacing:.3px}
+  .brand p{font-size:.78rem;opacity:.9}
+  .spacer{flex:1}
+  .btn-clear{
+    border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.15);color:#fff;
+    padding:8px 14px;border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:600;
+    transition:.2s;
+  }
+  .btn-clear:hover{background:rgba(255,255,255,.3);transform:translateY(-1px)}
+
+  /* ---------- Config warning ---------- */
+  .warn{
+    display:none;background:#fff3cd;color:#7a5b00;border-bottom:1px solid #ffe69c;
+    padding:10px 20px;font-size:.85rem;line-height:1.4;
+  }
+  .warn code{background:rgba(0,0,0,.07);padding:1px 6px;border-radius:5px}
+
+  /* ---------- Chat area ---------- */
+  #chat{
+    flex:1;overflow-y:auto;padding:22px 18px;scroll-behavior:smooth;
+    display:flex;flex-direction:column;gap:16px;
+  }
+  #chat::-webkit-scrollbar{width:8px}
+  #chat::-webkit-scrollbar-thumb{background:#e3cfe9;border-radius:8px}
+
+  /* Welcome */
+  .welcome{
+    margin:auto;text-align:center;max-width:640px;padding:10px;
+    animation:fadeUp .6s ease both;
+  }
+  .welcome .big{
+    width:84px;height:84px;margin:0 auto 14px;border-radius:26px;background:var(--grad);
+    display:grid;place-items:center;font-size:44px;box-shadow:var(--shadow);
+    animation:float 3.5s ease-in-out infinite;
+  }
+  .welcome h2{
+    font-size:1.7rem;margin-bottom:6px;
+    background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .welcome p{color:var(--muted);line-height:1.55;margin-bottom:18px}
+  .chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+  .chip{
+    border:1px solid var(--border);background:var(--card);color:var(--text);
+    padding:10px 14px;border-radius:14px;cursor:pointer;font-size:.9rem;
+    box-shadow:0 3px 10px rgba(0,0,0,.04);transition:.2s;text-align:left;
+  }
+  .chip:hover{
+    transform:translateY(-3px);border-color:var(--saffron);
+    box-shadow:0 8px 18px rgba(255,122,24,.22);
+  }
+
+  /* Messages */
+  .msg{display:flex;gap:10px;max-width:88%;animation:fadeUp .35s ease both}
+  .msg.user{align-self:flex-end;flex-direction:row-reverse}
+  .avatar{
+    flex:0 0 38px;height:38px;border-radius:50%;display:grid;place-items:center;
+    font-size:19px;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,.15);
+  }
+  .msg.ai .avatar{background:var(--grad)}
+  .msg.user .avatar{background:linear-gradient(135deg,#3b82f6,#6f42c1)}
+  .bubble{
+    padding:12px 16px;border-radius:18px;line-height:1.6;font-size:.96rem;
+    word-wrap:break-word;overflow-wrap:anywhere;
+  }
+  .msg.ai .bubble{
+    background:var(--card);border:1px solid var(--border);border-top-left-radius:4px;
+    box-shadow:var(--shadow);
+  }
+  .msg.user .bubble{
+    background:var(--grad);color:#fff;border-top-right-radius:4px;
+    box-shadow:0 8px 20px rgba(214,51,108,.3);white-space:pre-wrap;
+  }
+  .msg.error .bubble{background:#fff0f0;border:1px solid #f5b5b5;color:#a12626}
+  .msg.error .avatar{background:#dc3545}
+  .bubble p{margin-bottom:8px}
+  .bubble p:last-child{margin-bottom:0}
+  .bubble ul,.bubble ol{margin:6px 0 8px 22px}
+  .bubble li{margin-bottom:4px}
+  .bubble h3,.bubble h4{margin:8px 0 4px;color:var(--deep)}
+  .bubble strong{color:var(--deep)}
+  .bubble code{background:#f4eefb;padding:1px 6px;border-radius:5px;font-size:.9em}
+  .time{font-size:.7rem;color:var(--muted);margin-top:4px;padding:0 6px}
+  .msg.user .time{text-align:right}
+
+  /* Typing indicator */
+  .typing{display:flex;gap:5px;align-items:center;padding:4px 2px}
+  .typing span{
+    width:9px;height:9px;border-radius:50%;background:var(--magenta);
+    animation:bounce 1.2s infinite ease-in-out;
+  }
+  .typing span:nth-child(2){animation-delay:.15s;background:var(--saffron)}
+  .typing span:nth-child(3){animation-delay:.3s;background:var(--purple)}
+  .typing-label{font-size:.8rem;color:var(--muted);margin-left:8px}
+
+  /* ---------- Input area ---------- */
+  .footer{
+    padding:12px 18px 14px;background:rgba(255,255,255,.85);border-top:1px solid var(--border);
+  }
+  .quick{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+  .quick::-webkit-scrollbar{display:none}
+  .quick button{
+    white-space:nowrap;border:1px solid var(--border);background:#fff;color:var(--deep);
+    padding:6px 12px;border-radius:999px;font-size:.8rem;cursor:pointer;transition:.2s;
+  }
+  .quick button:hover{background:var(--saffron);color:#fff;border-color:var(--saffron)}
+  .inputbar{
+    display:flex;gap:10px;align-items:flex-end;background:#fff;border:2px solid var(--border);
+    border-radius:20px;padding:8px 8px 8px 16px;transition:.2s;
+  }
+  .inputbar:focus-within{border-color:var(--magenta);box-shadow:0 0 0 4px rgba(214,51,108,.12)}
+  textarea{
+    flex:1;border:none;outline:none;resize:none;font:inherit;font-size:.97rem;
+    max-height:130px;min-height:26px;padding:6px 0;background:transparent;color:var(--text);
+  }
+  #send{
+    width:44px;height:44px;border:none;border-radius:14px;background:var(--grad);color:#fff;
+    cursor:pointer;display:grid;place-items:center;transition:.2s;flex:0 0 44px;
+    box-shadow:0 6px 16px rgba(214,51,108,.4);
+  }
+  #send:hover:not(:disabled){transform:translateY(-2px) scale(1.04)}
+  #send:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+  #send svg{width:20px;height:20px;fill:#fff}
+  .note{text-align:center;font-size:.72rem;color:var(--muted);margin-top:8px}
+
+  /* ---------- Animations ---------- */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  @keyframes bounce{0%,80%,100%{transform:scale(.55);opacity:.5}40%{transform:scale(1);opacity:1}}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:640px){
+    header{padding:12px 14px}
+    .brand h1{font-size:1.02rem}
+    .brand p{display:none}
+    #chat{padding:16px 10px}
+    .msg{max-width:96%}
+    .avatar{flex-basis:32px;height:32px;font-size:16px}
+    .welcome h2{font-size:1.4rem}
+    .footer{padding:10px}
+    .app{border:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div class="logo">🪔</div>
+    <div class="brand">
+      <h1>Cultural Event Guide</h1>
+      <p>Your AI companion for Indian festivals &amp; traditions</p>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn-clear" id="clearBtn" title="Clear the conversation">🗑 Clear chat</button>
+  </header>
+
+  <div class="warn" id="keyWarning">
+    ⚠️ <b>No Gemini API key found.</b> Open <code>index.html</code>, find the
+    <code>CONFIGURATION</code> section in the script and paste your key into
+    <code>GEMINI_API_KEY</code>.
+  </div>
+
+  <main id="chat"></main>
+
+  <div class="footer">
+    <div class="quick" id="quick"></div>
+    <div class="inputbar">
+      <textarea id="input" rows="1" placeholder="Ask about a festival, tradition, exhibition or cultural activity…"></textarea>
+      <button id="send" title="Send" aria-label="Send message">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="note">Press Enter to send • Shift+Enter for a new line • Always verify event dates, venues and tickets with official sources.</div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIGURATION  ←  EDIT THIS SECTION
+   ---------------------------------------------------------------------
+   1. Get a free key from Google AI Studio: https://aistudio.google.com/apikey
+   2. Paste it between the quotes below.
+
+   ⚠️ SECURITY WARNING:
+   Any API key placed in frontend JavaScript is visible to anyone who opens
+   this page (View Source / DevTools). This setup is for a LOCAL COLLEGE
+   DEMONSTRATION ONLY. Never deploy this publicly with a real key, and never
+   upload this file to GitHub with your key inside. For production, keep the
+   key on a server-side backend.
+   ===================================================================== */
+const GEMINI_API_KEY = "Your api key";   // <-- PASTE YOUR OWN GEMINI API KEY HERE
+
+// Models are tried in order. If one is not available for your key/region
+// (HTTP 404), the next one is tried automatically.
+// Check the latest names at: https://ai.google.dev/gemini-api/docs/models
+const GEMINI_MODELS = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite"];
+
+const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
+/* ===================== END OF CONFIGURATION ===================== */
+
+
+/* ---------- AI personality (system instruction) ---------- */
+const SYSTEM_PROMPT =
+"You are Cultural Event Guide, an intelligent and friendly cultural assistant. Your purpose is to help users explore Indian festivals, traditions, cultural events, exhibitions and celebrations. Give accurate, informative and easy-to-understand answers. Never invent current event dates, locations, availability or ticket prices. Clearly communicate uncertainty.";
+
+// Extra guidance appended to the system instruction (topics + style).
+const EXTRA_CONTEXT = `
+Topics you know well: Diwali, Holi, Ganesh Chaturthi, Navratri, Dussehra, Makar Sankranti, Janmashtami, Eid, Christmas, Pongal, Onam and Baisakhi, plus Maharashtra culture (Lavani, Powada, Warli art, Paithani sarees, Puran Poli, Modak, Gudi Padwa, Pandharpur Wari, Kumbh Mela at Nashik, Ajanta and Ellora caves, Kala Ghoda Festival, Ganeshotsav in Pune and Mumbai), classical dance and music, handicrafts, museums and exhibitions.
+Style rules: keep answers simple and beginner-friendly; use short paragraphs or bullet points; use a few relevant emojis; explain the history, meaning, rituals, food and regional variations when asked; end with a short follow-up suggestion when helpful.
+Date rules: festival dates based on lunar or solar calendars change every year, so give the usual month or season and tell the user to confirm the exact date in an official calendar. For museums, exhibitions, shows, tickets, timings or prices, say you cannot confirm live information and suggest the official website, venue or a ticketing platform. If you are not sure, say so plainly.
+`;
+
+/* ---------- Suggested questions ---------- */
+const WELCOME_SUGGESTIONS = [
+  "🪔 Tell me about the history of Diwali",
+  "🎨 Why do we celebrate Holi?",
+  "🐘 How is Ganesh Chaturthi celebrated in Maharashtra?",
+  "💃 Explain the 9 days of Navratri",
+  "🍚 What is Pongal and how is it celebrated?",
+  "🌼 What is Onam and what is a Sadya?"
+];
+const QUICK_SUGGESTIONS = [
+  "Dussehra significance", "Makar Sankranti traditions", "Janmashtami Dahi Handi",
+  "Eid celebrations", "Christmas in India", "Baisakhi in Punjab",
+  "Maharashtra culture", "Suggest cultural activities for a weekend",
+  "Famous art exhibitions in India", "Traditional Maharashtrian food"
+];
+
+/* ---------- State & elements ---------- */
+const chatEl = document.getElementById("chat");
+const inputEl = document.getElementById("input");
+const sendBtn = document.getElementById("send");
+const clearBtn = document.getElementById("clearBtn");
+const quickEl = document.getElementById("quick");
+let history = [];        // conversation context sent to Gemini
+let busy = false;
+
+/* ---------- Helpers ---------- */
+function escapeHtml(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function inlineMd(s){
+  return s
+    .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
+    .replace(/(^|[^*])\*(?!\s)(.+?)\*(?!\*)/g,"$1<em>$2</em>")
+    .replace(/`(.+?)`/g,"<code>$1</code>");
+}
+// Small, safe Markdown renderer (headings, lists, bold, italics, code, paragraphs)
+function renderMarkdown(text){
+  const lines = escapeHtml(text).split("\n");
+  let html = "", list = null;
+  const closeList = () => { if(list){ html += `</${list}>`; list = null; } };
+  for(const raw of lines){
+    const line = raw.trimEnd();
+    let m;
+    if((m = line.match(/^\s*[-*•]\s+(.*)/))){
+      if(list !== "ul"){ closeList(); html += "<ul>"; list = "ul"; }
+      html += `<li>${inlineMd(m[1])}</li>`;
+    } else if((m = line.match(/^\s*\d+[.)]\s+(.*)/))){
+      if(list !== "ol"){ closeList(); html += "<ol>"; list = "ol"; }
+      html += `<li>${inlineMd(m[1])}</li>`;
+    } else if((m = line.match(/^#{1,6}\s+(.*)/))){
+      closeList(); html += `<h4>${inlineMd(m[1])}</h4>`;
+    } else if(line.trim() === ""){
+      closeList();
+    } else {
+      closeList(); html += `<p>${inlineMd(line)}</p>`;
+    }
+  }
+  closeList();
+  return html;
+}
+function timeNow(){
+  return new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+}
+function scrollDown(){ chatEl.scrollTop = chatEl.scrollHeight; }
+
+/* ---------- UI building ---------- */
+function showWelcome(){
+  chatEl.innerHTML = `
+    <div class="welcome" id="welcome">
+      <div class="big">🪔</div>
+      <h2>Namaste! Welcome 🙏</h2>
+      <p>I'm <b>Cultural Event Guide</b>. Ask me about Indian festivals, traditions, history,
+         exhibitions, cultural programmes and the rich culture of Maharashtra. Pick a question below or type your own.</p>
+      <div class="chips" id="chips"></div>
+    </div>`;
+  const chips = document.getElementById("chips");
+  WELCOME_SUGGESTIONS.forEach(q => {
+    const b = document.createElement("button");
+    b.className = "chip"; b.textContent = q;
+    b.onclick = () => sendMessage(q.replace(/^\S+\s/, ""));
+    chips.appendChild(b);
+  });
+}
+function buildQuick(){
+  quickEl.innerHTML = "";
+  QUICK_SUGGESTIONS.forEach(q => {
+    const b = document.createElement("button");
+    b.textContent = q;
+    b.onclick = () => sendMessage(q);
+    quickEl.appendChild(b);
+  });
+}
+function addMessage(role, text, isError=false){
+  const w = document.getElementById("welcome");
+  if(w) w.remove();
+  const wrap = document.createElement("div");
+  wrap.className = `msg ${role}${isError ? " error" : ""}`;
+  const icon = isError ? "⚠️" : (role === "user" ? "🧑" : "🪔");
+  const body = role === "user" ? escapeHtml(text) : renderMarkdown(text);
+  wrap.innerHTML = `
+    <div class="avatar">${icon}</div>
+    <div>
+      <div class="bubble">${body}</div>
+      <div class="time">${role === "user" ? "You" : "Cultural Event Guide"} • ${timeNow()}</div>
+    </div>`;
+  chatEl.appendChild(wrap);
+  scrollDown();
+}
+function showTyping(){
+  const wrap = document.createElement("div");
+  wrap.className = "msg ai"; wrap.id = "typing";
+  wrap.innerHTML = `
+    <div class="avatar">🪔</div>
+    <div class="bubble"><div class="typing"><span></span><span></span><span></span>
+      <span class="typing-label">Thinking…</span></div></div>`;
+  chatEl.appendChild(wrap);
+  scrollDown();
+}
+function hideTyping(){
+  const t = document.getElementById("typing");
+  if(t) t.remove();
+}
+function setBusy(state){
+  busy = state;
+  sendBtn.disabled = state;
+  inputEl.disabled = state;
+  if(!state) inputEl.focus();
+}
+
+/* ---------- Gemini API ---------- */
+function friendlyError(status, apiMessage){
+  const msg = apiMessage ? `\n\nDetails from Google: ${apiMessage}` : "";
+  if(status === 400) return "Gemini rejected the request (400). If the details mention an API key, your key may be invalid." + msg;
+  if(status === 401 || status === 403) return "Your API key was not accepted (permission denied). Check that the key is correct and that the Gemini API is enabled for it." + msg;
+  if(status === 404) return "The selected Gemini model was not found. Update the GEMINI_MODELS list in the configuration section." + msg;
+  if(status === 429) return "Too many requests or the free quota has been reached. Please wait a minute and try again." + msg;
+  if(status >= 500) return "Google's Gemini service is having trouble right now. Please try again shortly." + msg;
+  return `Something went wrong (status ${status}).` + msg;
+}
+
+async function callGemini(model){
+  const today = new Date().toLocaleDateString("en-IN",
+    {weekday:"long", year:"numeric", month:"long", day:"numeric"});
+  const body = {
+    system_instruction: {
+      parts: [{ text: SYSTEM_PROMPT + "\n" + EXTRA_CONTEXT + `\nToday's date is ${today}.` }]
+    },
+    contents: history,
+    generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+  };
+  const res = await fetch(`${GEMINI_BASE_URL}${model}:generateContent`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
+    body: JSON.stringify(body)
+  });
+  let data = null;
+  try { data = await res.json(); } catch(e) {}
+  if(!res.ok){
+    const err = new Error(friendlyError(res.status, data && data.error && data.error.message));
+    err.status = res.status;
+    throw err;
+  }
+  const cand = data && data.candidates && data.candidates[0];
+  if(!cand){
+    const reason = data && data.promptFeedback && data.promptFeedback.blockReason;
+    throw new Error(reason
+      ? `Gemini could not answer this message (reason: ${reason}). Please rephrase your question.`
+      : "Gemini returned an empty response. Please try again.");
+  }
+  const parts = (cand.content && cand.content.parts) || [];
+  const text = parts.filter(p => p.text && !p.thought).map(p => p.text).join("").trim();
+  if(!text){
+    throw new Error(cand.finishReason === "SAFETY"
+      ? "The response was blocked by Gemini's safety filters. Please rephrase your question."
+      : "Gemini returned an empty response. Please try again.");
+  }
+  return text;
+}
+
+async function askGemini(){
+  let lastErr;
+  for(const model of GEMINI_MODELS){
+    try{
+      return await callGemini(model);
+    }catch(e){
+      lastErr = e;
+      if(e.status !== 404) throw e;      // only fall back on "model not found"
+    }
+  }
+  throw lastErr;
+}
+
+/* ---------- Send flow ---------- */
+async function sendMessage(textFromChip){
+  if(busy) return;
+  const text = (typeof textFromChip === "string" ? textFromChip : inputEl.value).trim();
+  if(!text) return;
+
+  if(!GEMINI_API_KEY || !GEMINI_API_KEY.trim()){
+    document.getElementById("keyWarning").style.display = "block";
+    addMessage("user", text);
+    addMessage("ai",
+      "I can't reach Gemini yet because no API key has been added. Open index.html, find the CONFIGURATION section and paste your key into GEMINI_API_KEY, then save and refresh this page.",
+      true);
+    inputEl.value = "";
+    return;
+  }
+
+  inputEl.value = "";
+  autoResize();
+  addMessage("user", text);
+  history.push({ role: "user", parts: [{ text }] });
+  if(history.length > 30) history = history.slice(-30);   // keep context manageable
+  setBusy(true);
+  showTyping();
+
+  try{
+    const reply = await askGemini();
+    hideTyping();
+    history.push({ role: "model", parts: [{ text: reply }] });
+    addMessage("ai", reply);
+  }catch(e){
+    hideTyping();
+    history.pop();                                         // drop failed question from context
+    const offline = !navigator.onLine || e instanceof TypeError;
+    addMessage("ai",
+      offline ? "Network problem: I couldn't connect to Gemini. Please check your internet connection and try again."
+              : e.message,
+      true);
+  }finally{
+    setBusy(false);
+  }
+}
+
+/* ---------- Events ---------- */
+function autoResize(){
+  inputEl.style.height = "auto";
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 130) + "px";
+}
+inputEl.addEventListener("input", autoResize);
+inputEl.addEventListener("keydown", e => {
+  if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+});
+sendBtn.addEventListener("click", () => sendMessage());
+clearBtn.addEventListener("click", () => {
+  if(busy) return;
+  history = [];
+  showWelcome();
+  inputEl.focus();
+});
+
+/* ---------- Init ---------- */
+if(!GEMINI_API_KEY || !GEMINI_API_KEY.trim()){
+  document.getElementById("keyWarning").style.display = "block";
+}
+showWelcome();
+buildQuick();
+inputEl.focus();
+</script>
+</body>
+</html>
